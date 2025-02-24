@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análise Dermatológica</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .morphic-bg {
+            background: linear-gradient(45deg, #1a1a1a, #2a2a2a);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .morphic-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+
+        .btn-glow {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .btn-glow::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: rotate(45deg);
+            animation: glow 2s infinite;
+        }
+
+        @keyframes glow {
+            0% { transform: rotate(45deg) translateX(-100%); }
+            100% { transform: rotate(45deg) translateX(100%); }
+        }
+
+        .camera-container {
+            position: relative;
+            width: 100%;
+            max-width: 640px;
+            margin: 0 auto;
+        }
+
+        #camera-preview {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 12px;
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .slide-up {
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body class="min-h-screen text-gray-100">
+    <div class="morphic-bg"></div>
+
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-4xl mx-auto">
+            <h1 class="text-4xl md:text-5xl font-bold text-center mb-8 slide-up">
+                <span class="bg-gradient-to-r from-blue-400 to-purple-500 text-transparent bg-clip-text">
+                    Análise Dermatológica
+                </span>
+            </h1>
+
+            <div class="morphic-card rounded-xl p-6 md:p-8 mb-8 slide-up">
+                <div class="grid md:grid-cols-2 gap-8">
+                    <!-- Área de Captura/Upload -->
+                    <div class="space-y-6">
+                        <div class="camera-container bg-gray-900 rounded-xl overflow-hidden aspect-video">
+                            <video id="camera-preview" class="hidden"></video>
+                            <img id="image-preview" class="hidden w-full h-full object-cover" alt="Preview">
+                            <div id="placeholder" class="w-full h-full flex items-center justify-center text-gray-400">
+                                <i class="fas fa-camera text-4xl"></i>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <button id="start-camera" class="btn-glow bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-camera mr-2"></i>
+                                Câmera
+                            </button>
+                            <label class="btn-glow bg-purple-600 hover:bg-purple-700 text-white py-3 px-6 rounded-lg flex items-center justify-center cursor-pointer">
+                                <i class="fas fa-upload mr-2"></i>
+                                Upload
+                                <input type="file" accept="image/*" id="file-input" class="hidden">
+                            </label>
+                        </div>
+
+                        <button id="capture-photo" class="hidden w-full btn-glow bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded-lg">
+                            <i class="fas fa-camera-retro mr-2"></i>
+                            Capturar Foto
+                        </button>
+                    </div>
+
+                    <!-- Área de Resultados -->
+                    <div class="space-y-6">
+                        <button id="analyze-btn" class="w-full btn-glow bg-indigo-600 hover:bg-indigo-700 text-white py-4 px-6 rounded-lg font-semibold">
+                            Analisar Imagem
+                        </button>
+
+                        <!-- Loading -->
+                        <div id="loading" class="hidden">
+                            <div class="flex items-center justify-center space-x-4">
+                                <div class="w-12 h-12 border-4 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
+                                <span class="text-blue-400">Analisando...</span>
+                            </div>
+                        </div>
+
+                        <!-- Resultados -->
+                        <div id="results" class="hidden space-y-4 bg-gray-800 bg-opacity-50 rounded-lg p-6">
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-300">Status:</span>
+                                <span id="statusPele" class="px-4 py-1 rounded-full"></span>
+                            </div>
+
+                            <div>
+                                <h3 class="text-gray-300 mb-2">Características:</h3>
+                                <p id="caracteristicas" class="text-sm bg-gray-700 bg-opacity-50 rounded-lg p-3"></p>
+                            </div>
+
+                            <div>
+                                <h3 class="text-gray-300 mb-2">Condições:</h3>
+                                <div id="condicoes" class="space-y-2"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let stream = null;
+        const cameraPreview = document.getElementById('camera-preview');
+        const imagePreview = document.getElementById('image-preview');
+        const placeholder = document.getElementById('placeholder');
+        const startCamera = document.getElementById('start-camera');
+        const capturePhoto = document.getElementById('capture-photo');
+        const fileInput = document.getElementById('file-input');
+        let imageBlob = null;
+
+        // Iniciar câmera
+        startCamera.addEventListener('click', async () => {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        facingMode: 'environment',
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    } 
+                });
+                cameraPreview.srcObject = stream;
+                cameraPreview.classList.remove('hidden');
+                imagePreview.classList.add('hidden');
+                placeholder.classList.add('hidden');
+                capturePhoto.classList.remove('hidden');
+                cameraPreview.play();
+            } catch (err) {
+                console.error('Erro ao acessar a câmera:', err);
+                alert('Não foi possível acessar a câmera. Por favor, verifique as permissões.');
+            }
+        });
+
+        // Capturar foto
+        capturePhoto.addEventListener('click', () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = cameraPreview.videoWidth;
+            canvas.height = cameraPreview.videoHeight;
+            canvas.getContext('2d').drawImage(cameraPreview, 0, 0);
+            
+            canvas.toBlob(blob => {
+                imageBlob = blob;
+                imagePreview.src = URL.createObjectURL(blob);
+                imagePreview.classList.remove('hidden');
+                cameraPreview.classList.add('hidden');
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
+                }
+                capturePhoto.classList.add('hidden');
+            }, 'image/jpeg', 0.8);
+        });
+
+        // Upload de arquivo
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files && e.target.files[0]) {
+                imageBlob = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    imagePreview.src = e.target.result;
+                    imagePreview.classList.remove('hidden');
+                    cameraPreview.classList.add('hidden');
+                    placeholder.classList.add('hidden');
+                    capturePhoto.classList.add('hidden');
+                };
+                reader.readAsDataURL(e.target.files[0]);
+            }
+        });
+
+        // Analisar imagem
+        document.getElementById('analyze-btn').addEventListener('click', async () => {
+            if (!imageBlob) {
+                alert('Por favor, capture uma foto ou faça upload de uma imagem.');
+                return;
+            }
+
+            const loading = document.getElementById('loading');
+            const results = document.getElementById('results');
+            loading.classList.remove('hidden');
+            results.classList.add('hidden');
+
+            const formData = new FormData();
+            formData.append('image', imageBlob);
+
+            try {
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+                displayResults(result);
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('Ocorreu um erro durante a análise.');
+            } finally {
+                loading.classList.add('hidden');
+            }
+        });
+
+        function displayResults(result) {
+            const results = document.getElementById('results');
+            results.classList.remove('hidden');
+
+            // Status
+            const statusElement = document.getElementById('statusPele');
+            if (result.saudavel) {
+                statusElement.textContent = 'Saudável';
+                statusElement.className = 'px-4 py-1 rounded-full bg-green-500 text-white';
+            } else {
+                statusElement.textContent = 'Requer Atenção';
+                statusElement.className = 'px-4 py-1 rounded-full bg-red-500 text-white';
+            }
+
+            // Características
+            document.getElementById('caracteristicas').textContent = 
+                result.caracteristicas.replace(/\\n/g, ' ');
+
+            // Condições
+            const condicoesDiv = document.getElementById('condicoes');
+            condicoesDiv.innerHTML = '';
+            result.possiveis_condicoes.forEach(condicao => {
+                const div = document.createElement('div');
+                div.className = 'flex items-center justify-between bg-gray-700 bg-opacity-50 p-3 rounded-lg';
+                
+                const urgencyColor = 
+                    condicao.urgencia.toLowerCase() === 'alta' ? 'bg-red-500' :
+                    condicao.urgencia.toLowerCase() === 'média' ? 'bg-yellow-500' : 
+                    'bg-green-500';
+
+                div.innerHTML = `
+                    <span class="flex items-center">
+                        <i class="fas fa-exclamation-circle mr-2"></i>
+                        ${condicao.condicao}
+                    </span>
+                    <span class="px-3 py-1 rounded-full ${urgencyColor}">
+                        ${condicao.urgencia}
+                    </span>
+                `;
+                condicoesDiv.appendChild(div);
+            });
+        }
+    </script>
+</body>
+</html>
