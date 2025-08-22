@@ -3,307 +3,584 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Análise Dermatológica</title>
+    <title>Kulit - Análise Dermatológica</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-        
-        * {
-            font-family: 'Poppins', sans-serif;
-        }
-
-        .morphic-bg {
-            background: linear-gradient(45deg, #1a1a1a, #2a2a2a);
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-        }
-
-        .morphic-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-        }
-
-        .btn-glow {
-            position: relative;
-            overflow: hidden;
-            transition: all 0.3s ease;
-        }
-
-        .btn-glow::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
-            transform: rotate(45deg);
-            animation: glow 2s infinite;
-        }
-
-        @keyframes glow {
-            0% { transform: rotate(45deg) translateX(-100%); }
-            100% { transform: rotate(45deg) translateX(100%); }
-        }
-
-        .camera-container {
-            position: relative;
-            width: 100%;
-            max-width: 640px;
-            margin: 0 auto;
-        }
-
-        #camera-preview {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 12px;
-        }
-
-        .pulse {
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-
-        .slide-up {
-            animation: slideUp 0.5s ease-out;
-        }
-
-        @keyframes slideUp {
-            from { transform: translateY(20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        * { font-family: 'Inter', 'Poppins', sans-serif; }
+        .sidebar-enter { animation: sidebarIn 0.5s cubic-bezier(.4,0,.2,1); }
+        @keyframes sidebarIn { from { transform: translateX(-100%); opacity:0; } to { transform: translateX(0); opacity:1; } }
+        .fade-in { animation: fadeIn 0.6s cubic-bezier(.4,0,.2,1); }
+        @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
     </style>
 </head>
-<body class="min-h-screen text-gray-100">
-    <div class="morphic-bg"></div>
-
-    <div class="container mx-auto px-4 py-8">
-        <div class="max-w-4xl mx-auto">
-            <h1 class="text-4xl md:text-5xl font-bold text-center mb-8 slide-up">
-                <span class="bg-gradient-to-r from-blue-400 to-purple-500 text-transparent bg-clip-text">
-                    Análise Dermatológica
-                </span>
-            </h1>
-
-            <div class="morphic-card rounded-xl p-6 md:p-8 mb-8 slide-up">
-                <div class="grid md:grid-cols-2 gap-8">
-                    <!-- Área de Captura/Upload -->
-                    <div class="space-y-6">
-                        <div class="camera-container bg-gray-900 rounded-xl overflow-hidden aspect-video">
-                            <video id="camera-preview" class="hidden"></video>
-                            <img id="image-preview" class="hidden w-full h-full object-cover" alt="Preview">
-                            <div id="placeholder" class="w-full h-full flex items-center justify-center text-gray-400">
-                                <i class="fas fa-camera text-4xl"></i>
-                            </div>
+<body class="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-800 text-gray-100">
+<div class="flex min-h-screen">
+    <!-- Sidebar -->
+    <aside class="sidebar-enter w-64 bg-gray-900 border-r border-gray-800 flex flex-col z-20 min-h-screen hidden md:flex">
+        <div class="h-20 flex items-center justify-center border-b border-gray-800">
+            <span class="text-2xl font-bold text-white tracking-tight">Kulit</span>
+        </div>
+        <nav class="flex-1 py-4">
+            <ul class="space-y-1">
+                <li><button id="tab-dashboard" class="w-full text-left px-6 py-3 hover:bg-gray-800 rounded transition-colors flex items-center text-gray-300 font-semibold"><i class="fas fa-home mr-2"></i> Dashboard</button></li>
+                <li><button id="tab-news" class="w-full text-left px-6 py-3 hover:bg-gray-800 rounded transition-colors flex items-center text-gray-300 font-semibold"><i class="fas fa-newspaper mr-2"></i> Notícias</button></li>
+                <li><button id="tab-info" class="w-full text-left px-6 py-3 hover:bg-gray-800 rounded transition-colors flex items-center text-gray-300 font-semibold"><i class="fas fa-info-circle mr-2"></i> Sobre Câncer de Pele</button></li>
+            </ul>
+        </nav>
+        <div class="p-6 text-xs text-gray-500">&copy; 2024 Kulit</div>
+    </aside>
+    <!-- Sidebar mobile -->
+    <div class="md:hidden fixed top-0 left-0 w-full z-30 bg-gray-900 border-b border-gray-800 flex items-center justify-between px-4 h-16">
+        <span class="text-xl font-bold text-white">Kulit</span>
+        <button id="openSidebar" class="text-gray-400 focus:outline-none"><i class="fas fa-bars fa-lg"></i></button>
+    </div>
+    <div id="mobileSidebar" class="fixed inset-0 bg-black bg-opacity-60 z-40 hidden">
+        <aside class="sidebar-enter w-64 bg-gray-900 border-r border-gray-800 flex flex-col min-h-screen">
+            <div class="h-20 flex items-center justify-center border-b border-gray-800">
+                <span class="text-2xl font-bold text-white tracking-tight">Kulit</span>
+                <button id="closeSidebar" class="ml-auto text-gray-400 px-4"><i class="fas fa-times"></i></button>
+            </div>
+            <nav class="flex-1 py-4">
+                <ul class="space-y-1">
+                    <li><button id="tab-dashboard-m" class="w-full text-left px-6 py-3 hover:bg-gray-800 rounded transition-colors flex items-center text-gray-300 font-semibold"><i class="fas fa-home mr-2"></i> Dashboard</button></li>
+                    <li><button id="tab-news-m" class="w-full text-left px-6 py-3 hover:bg-gray-800 rounded transition-colors flex items-center text-gray-300 font-semibold"><i class="fas fa-newspaper mr-2"></i> Notícias</button></li>
+                    <li><button id="tab-info-m" class="w-full text-left px-6 py-3 hover:bg-gray-800 rounded transition-colors flex items-center text-gray-300 font-semibold"><i class="fas fa-info-circle mr-2"></i> Sobre Câncer de Pele</button></li>
+                </ul>
+            </nav>
+        </aside>
+    </div>
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col items-center justify-center px-2 md:px-8 py-8 fade-in">
+        <!-- Dashboard -->
+        <section id="dashboard-section" class="w-full max-w-5xl mx-auto">
+            <h1 class="text-4xl md:text-5xl font-bold text-center mb-8 bg-gradient-to-r from-blue-400 to-pink-500 text-transparent bg-clip-text">Análise Dermatológica</h1>
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- Upload/Captura -->
+                <div class="space-y-6">
+                    <div class="bg-gray-900 rounded-xl overflow-hidden aspect-video flex items-center justify-center border border-gray-800 shadow-lg">
+                        <video id="camera-preview" class="hidden"></video>
+                        <img id="image-preview" class="hidden w-full h-full object-cover" alt="Preview">
+                        <div id="placeholder" class="w-full h-full flex items-center justify-center text-gray-400">
+                            <i class="fas fa-camera text-4xl"></i>
                         </div>
-
-                        <div class="grid grid-cols-2 gap-4">
-                            <button id="start-camera" class="btn-glow bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg flex items-center justify-center">
-                                <i class="fas fa-camera mr-2"></i>
-                                Câmera
-                            </button>
-                            <label class="btn-glow bg-purple-600 hover:bg-purple-700 text-white py-3 px-6 rounded-lg flex items-center justify-center cursor-pointer">
-                                <i class="fas fa-upload mr-2"></i>
-                                Upload
-                                <input type="file" accept="image/*" id="file-input" class="hidden">
-                            </label>
-                        </div>
-
-                        <button id="capture-photo" class="hidden w-full btn-glow bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded-lg">
-                            <i class="fas fa-camera-retro mr-2"></i>
-                            Capturar Foto
-                        </button>
                     </div>
-
-                    <!-- Área de Resultados -->
-                    <div class="space-y-6">
-                        <button id="analyze-btn" class="w-full btn-glow bg-indigo-600 hover:bg-indigo-700 text-white py-4 px-6 rounded-lg font-semibold">
-                            Analisar Imagem
-                        </button>
-
-                        <!-- Loading -->
-                        <div id="loading" class="hidden">
-                            <div class="flex items-center justify-center space-x-4">
-                                <div class="w-12 h-12 border-4 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
-                                <span class="text-blue-400">Analisando...</span>
-                            </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <button id="start-camera" class="bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg flex items-center justify-center font-semibold shadow transition-transform transform hover:scale-105 focus:outline-none"><i class="fas fa-camera mr-2"></i>Câmera</button>
+                        <label class="bg-pink-600 hover:bg-pink-700 text-white py-3 px-6 rounded-lg flex items-center justify-center cursor-pointer font-semibold shadow transition-transform transform hover:scale-105 focus:outline-none"><i class="fas fa-upload mr-2"></i>Upload<input type="file" accept="image/*" id="file-input" class="hidden"></label>
+                    </div>
+                    <button id="capture-photo" class="hidden w-full bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded-lg font-semibold shadow transition-transform transform hover:scale-105 focus:outline-none"><i class="fas fa-camera-retro mr-2"></i>Capturar Foto</button>
+                </div>
+                <!-- Resultados -->
+                <div class="space-y-6">
+                    <button id="analyze-btn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-4 px-6 rounded-lg font-semibold shadow transition-transform transform hover:scale-105 focus:outline-none">Analisar Imagem</button>
+                    <div id="loading" class="hidden flex items-center justify-center space-x-4">
+                        <div class="w-12 h-12 border-4 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
+                        <span class="text-blue-400">Analisando...</span>
+                    </div>
+                    <div id="results" class="hidden space-y-4 bg-gray-800 bg-opacity-70 rounded-lg p-6 border border-gray-700">
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-300">Status:</span>
+                            <span id="statusPele" class="px-4 py-1 rounded-full"></span>
                         </div>
-
-                        <!-- Resultados -->
-                        <div id="results" class="hidden space-y-4 bg-gray-800 bg-opacity-50 rounded-lg p-6">
-                            <div class="flex items-center justify-between">
-                                <span class="text-gray-300">Status:</span>
-                                <span id="statusPele" class="px-4 py-1 rounded-full"></span>
-                            </div>
-
-                            <div>
-                                <h3 class="text-gray-300 mb-2">Características:</h3>
-                                <p id="caracteristicas" class="text-sm bg-gray-700 bg-opacity-50 rounded-lg p-3"></p>
-                            </div>
-
-                            <div>
-                                <h3 class="text-gray-300 mb-2">Condições:</h3>
-                                <div id="condicoes" class="space-y-2"></div>
-                            </div>
+                        <div>
+                            <h3 class="text-gray-300 mb-2 font-semibold">Características:</h3>
+                            <p id="caracteristicas" class="text-sm bg-gray-700 bg-opacity-50 rounded-lg p-3"></p>
+                        </div>
+                        <div>
+                            <h3 class="text-gray-300 mb-2 font-semibold">Condições:</h3>
+                            <div id="condicoes" class="space-y-2"></div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
+        </section>
+        <!-- Notícias (Página) -->
+        <section id="news-section" class="w-full max-w-4xl mx-auto hidden">
+            <h2 class="text-3xl font-bold mb-6 text-pink-400 flex items-center"><i class="fas fa-newspaper mr-2"></i> Notícias sobre Câncer de Pele</h2>
+            <div class="flex items-center mb-4">
+                <label class="mr-2 text-gray-300 font-semibold">Categoria:</label>
+                <select id="news-category-page" class="bg-gray-800 text-gray-200 rounded px-3 py-2 focus:outline-none border border-gray-700">
+                    <option value="all">Todas</option>
+                    <option value="pesquisa">Pesquisas</option>
+                    <option value="prevenção">Prevenção</option>
+                    <option value="tratamento">Tratamento</option>
+                    <option value="tecnologia">Tecnologia</option>
+                </select>
+            </div>
+            <div id="news-list-page" class="space-y-6">
+                <!-- Placeholder de notícias -->
+                <div class="bg-gray-800 rounded-lg p-4 border border-gray-700 animate-pulse">
+                    <div class="h-4 w-1/2 bg-gray-700 rounded mb-2"></div>
+                    <div class="h-3 w-1/3 bg-gray-700 rounded mb-1"></div>
+                    <div class="h-3 w-3/4 bg-gray-700 rounded"></div>
+                </div>
+                <div class="bg-gray-800 rounded-lg p-4 border border-gray-700 animate-pulse">
+                    <div class="h-4 w-1/2 bg-gray-700 rounded mb-2"></div>
+                    <div class="h-3 w-1/3 bg-gray-700 rounded mb-1"></div>
+                    <div class="h-3 w-3/4 bg-gray-700 rounded"></div>
+                </div>
+            </div>
+        </section>
+        <!-- Informações sobre Câncer de Pele -->
+        <section id="info-section" class="w-full max-w-3xl mx-auto hidden">
+            <h2 class="text-3xl font-bold mb-6 text-blue-400 flex items-center"><i class="fas fa-info-circle mr-2"></i> Sobre Câncer de Pele</h2>
+            <div class="bg-gray-900 rounded-xl p-6 border border-gray-800 shadow-lg space-y-4">
+                <h3 class="text-xl font-semibold text-gray-100">O que é?</h3>
+                <p class="text-gray-300">O câncer de pele é o crescimento anormal das células da pele, geralmente causado pela exposição excessiva ao sol. Existem diferentes tipos, sendo o carcinoma basocelular, carcinoma espinocelular e o melanoma os mais comuns.</p>
+                <h3 class="text-xl font-semibold text-gray-100">Fatores de risco</h3>
+                <ul class="list-disc pl-6 text-gray-300">
+                    <li>Exposição solar excessiva e sem proteção</li>
+                    <li>Pele clara, olhos claros, cabelos claros ou ruivos</li>
+                    <li>Histórico familiar de câncer de pele</li>
+                    <li>Presença de muitas pintas ou sinais</li>
+                </ul>
+                <h3 class="text-xl font-semibold text-gray-100">Prevenção</h3>
+                <ul class="list-disc pl-6 text-gray-300">
+                    <li>Usar protetor solar diariamente</li>
+                    <li>Evitar exposição ao sol entre 10h e 16h</li>
+                    <li>Usar chapéus, óculos escuros e roupas protetoras</li>
+                    <li>Observar regularmente a pele e procurar um dermatologista ao notar alterações</li>
+                </ul>
+                <h3 class="text-xl font-semibold text-gray-100">Sinais de alerta</h3>
+                <ul class="list-disc pl-6 text-gray-300">
+                    <li>Feridas que não cicatrizam</li>
+                    <li>Manchas que mudam de cor, formato ou tamanho</li>
+                    <li>Pintas assimétricas ou com bordas irregulares</li>
+                </ul>
+                <h3 class="text-xl font-semibold text-gray-100">Links úteis</h3>
+                <ul class="list-disc pl-6 text-blue-400">
+                    <li><a href="https://www.inca.gov.br/tipos/cancer-de-pele" target="_blank" class="hover:underline">INCA - Câncer de Pele</a></li>
+                    <li><a href="https://www.sbd.org.br/dermatologia/pele/cancer-de-pele/" target="_blank" class="hover:underline">Sociedade Brasileira de Dermatologia</a></li>
+                </ul>
+            </div>
+        </section>
+    </main>
+</div>
+<script>
+// Sidebar mobile toggle
+const openSidebar = document.getElementById('openSidebar');
+const closeSidebar = document.getElementById('closeSidebar');
+const mobileSidebar = document.getElementById('mobileSidebar');
+if(openSidebar) openSidebar.onclick = () => { mobileSidebar.classList.remove('hidden'); };
+if(closeSidebar) closeSidebar.onclick = () => { mobileSidebar.classList.add('hidden'); };
+mobileSidebar && mobileSidebar.addEventListener('click', e => { if(e.target === mobileSidebar) mobileSidebar.classList.add('hidden'); });
 
-    <script>
-        let stream = null;
-        const cameraPreview = document.getElementById('camera-preview');
-        const imagePreview = document.getElementById('image-preview');
-        const placeholder = document.getElementById('placeholder');
-        const startCamera = document.getElementById('start-camera');
-        const capturePhoto = document.getElementById('capture-photo');
-        const fileInput = document.getElementById('file-input');
-        let imageBlob = null;
+// Função para formatar a data
+function formatDate(dateString) {
+    if (!dateString) return '';
+    const options = { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    };
+    return new Date(dateString).toLocaleDateString('pt-BR', options);
+}
 
-        // Iniciar câmera
-        startCamera.addEventListener('click', async () => {
-            try {
-                stream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { 
-                        facingMode: 'environment',
-                        width: { ideal: 1280 },
-                        height: { ideal: 720 }
-                    } 
-                });
-                cameraPreview.srcObject = stream;
-                cameraPreview.classList.remove('hidden');
-                imagePreview.classList.add('hidden');
-                placeholder.classList.add('hidden');
-                capturePhoto.classList.remove('hidden');
-                cameraPreview.play();
-            } catch (err) {
-                console.error('Erro ao acessar a câmera:', err);
-                alert('Não foi possível acessar a câmera. Por favor, verifique as permissões.');
-            }
+// Função para criar o card de notícia
+function createNewsCard(article, isDashboard = false) {
+    const card = document.createElement('div');
+    card.className = 'bg-gray-800 rounded-lg overflow-hidden border border-gray-700 hover:border-blue-500 transition-colors duration-200';
+    
+    // Se tiver imagem
+    if (article.urlToImage) {
+        card.innerHTML = `
+            <img src="${article.urlToImage}" alt="${article.title || ''}" class="w-full h-40 object-cover">
+            <div class="p-4">
+                <h3 class="text-lg font-semibold text-white mb-2 line-clamp-2">${article.title || 'Sem título'}</h3>
+                <p class="text-gray-400 text-sm mb-3 line-clamp-3">${article.description || ''}</p>
+                <div class="flex justify-between items-center">
+                    <span class="text-xs text-gray-500">${article.source?.name || 'Fonte desconhecida'}</span>
+                    <span class="text-xs text-gray-500">${formatDate(article.publishedAt)}</span>
+                </div>
+            </div>
+        `;
+    } else {
+        // Card sem imagem
+        card.innerHTML = `
+            <div class="p-4">
+                <h3 class="text-lg font-semibold text-white mb-2 line-clamp-2">${article.title || 'Sem título'}</h3>
+                <p class="text-gray-400 text-sm mb-3 line-clamp-3">${article.description || ''}</p>
+                <div class="flex justify-between items-center">
+                    <span class="text-xs text-gray-500">${article.source?.name || 'Fonte desconhecida'}</span>
+                    <span class="text-xs text-gray-500">${formatDate(article.publishedAt)}</span>
+                </div>
+            </div>
+        `;
+    }
+    
+    // Adiciona evento de clique para abrir a notícia
+    if (article.url) {
+        card.style.cursor = 'pointer';
+        card.addEventListener('click', () => {
+            window.open(article.url, '_blank');
         });
+    }
+    
+    return card;
+}
 
-        // Capturar foto
-        capturePhoto.addEventListener('click', () => {
-            const canvas = document.createElement('canvas');
-            canvas.width = cameraPreview.videoWidth;
-            canvas.height = cameraPreview.videoHeight;
-            canvas.getContext('2d').drawImage(cameraPreview, 0, 0);
-            
-            canvas.toBlob(blob => {
-                imageBlob = blob;
-                imagePreview.src = URL.createObjectURL(blob);
-                imagePreview.classList.remove('hidden');
-                cameraPreview.classList.add('hidden');
-                if (stream) {
-                    stream.getTracks().forEach(track => track.stop());
-                }
-                capturePhoto.classList.add('hidden');
-            }, 'image/jpeg', 0.8);
-        });
-
-        // Upload de arquivo
-        fileInput.addEventListener('change', (e) => {
-            if (e.target.files && e.target.files[0]) {
-                imageBlob = e.target.files[0];
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    imagePreview.src = e.target.result;
-                    imagePreview.classList.remove('hidden');
-                    cameraPreview.classList.add('hidden');
-                    placeholder.classList.add('hidden');
-                    capturePhoto.classList.add('hidden');
-                };
-                reader.readAsDataURL(e.target.files[0]);
-            }
-        });
-
-        // Analisar imagem
-        document.getElementById('analyze-btn').addEventListener('click', async () => {
-            if (!imageBlob) {
-                alert('Por favor, capture uma foto ou faça upload de uma imagem.');
-                return;
-            }
-
-            const loading = document.getElementById('loading');
-            const results = document.getElementById('results');
-            loading.classList.remove('hidden');
-            results.classList.add('hidden');
-
-            const formData = new FormData();
-            formData.append('image', imageBlob);
-
-            try {
-                const response = await fetch('/analyze', {
-                    method: 'POST',
-                    body: formData
-                });
-                const result = await response.json();
-                displayResults(result);
-            } catch (error) {
-                console.error('Erro:', error);
-                alert('Ocorreu um erro durante a análise.');
-            } finally {
-                loading.classList.add('hidden');
-            }
-        });
-
-        function displayResults(result) {
-            const results = document.getElementById('results');
-            results.classList.remove('hidden');
-
-            // Status
-            const statusElement = document.getElementById('statusPele');
-            if (result.saudavel) {
-                statusElement.textContent = 'Saudável';
-                statusElement.className = 'px-4 py-1 rounded-full bg-green-500 text-white';
+// Função para renderizar as notícias
+function renderNews(articles, containerId) {
+    console.log(`Renderizando notícias no container: ${containerId}`);
+    const container = document.getElementById(containerId);
+    
+    if (!container) {
+        console.error(`Container com ID ${containerId} não encontrado`);
+        return;
+    }
+    
+    // Limpa o container
+    container.innerHTML = '';
+    
+    if (!articles || articles.length === 0) {
+        console.log('Nenhuma notícia para exibir');
+        container.innerHTML = `
+            <div class="col-span-2 text-center py-8">
+                <i class="fas fa-newspaper text-4xl text-gray-500 mb-2"></i>
+                <p class="text-gray-400">Nenhuma notícia encontrada.</p>
+            </div>
+        `;
+        return;
+    }
+    
+    console.log(`Total de artigos a serem exibidos: ${articles.length}`);
+    
+    // Cria um container de grid
+    const grid = document.createElement('div');
+    grid.className = 'grid md:grid-cols-2 gap-6';
+    
+    // Adiciona os cards de notícias
+    articles.forEach((article, index) => {
+        console.log(`Processando artigo ${index + 1}:`, article.title);
+        try {
+            const card = createNewsCard(article, false);
+            if (card) {
+                grid.appendChild(card);
             } else {
-                statusElement.textContent = 'Requer Atenção';
-                statusElement.className = 'px-4 py-1 rounded-full bg-red-500 text-white';
+                console.error('Erro ao criar card de notícia');
             }
+        } catch (error) {
+            console.error(`Erro ao processar artigo ${index + 1}:`, error);
+        }
+    });
+    
+    // Verifica se o grid tem filhos antes de adicionar ao container
+    if (grid.children.length > 0) {
+        console.log(`Adicionando ${grid.children.length} cards ao container`);
+        container.appendChild(grid);
+    } else {
+        console.error('Nenhum card de notícia foi criado');
+        container.innerHTML = `
+            <div class="col-span-2 text-center py-8">
+                <i class="fas fa-exclamation-triangle text-4xl text-yellow-500 mb-2"></i>
+                <p class="text-gray-400">Não foi possível carregar as notícias.</p>
+            </div>
+        `;
+    }
+}
 
-            // Características
-            document.getElementById('caracteristicas').textContent = 
-                result.caracteristicas.replace(/\\n/g, ' ');
+// Função para carregar as notícias da API
+async function loadNews() {
+    console.log('Iniciando carregamento de notícias...');
+    const newsListPage = document.getElementById('news-list-page');
+    
+    if (!newsListPage) {
+        console.log('Página de notícias não encontrada');
+        return;
+    }
+    
+    // Mostra estado de carregamento
+    const loadingHtml = `
+        <div class="col-span-2 flex flex-col items-center justify-center py-8">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mb-4"></div>
+            <p class="text-gray-400">Carregando notícias...</p>
+        </div>
+    `;
+    
+    newsListPage.innerHTML = loadingHtml;
+    
+    try {
+        console.log('Fazendo requisição para /api/news');
+        const response = await fetch('/api/news');
+        console.log('Resposta recebida, status:', response.status);
+        
+        if (!response.ok) {
+            throw new Error(`Erro na requisição: ${response.status} ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        console.log('Dados recebidos:', data);
+        
+        if (data.status === 'success' && data.articles) {
+            console.log(`Total de notícias recebidas: ${data.articles.length}`);
+            currentNews = data.articles;
+            
+            // Renderiza as notícias na página de notícias
+            console.log('Renderizando notícias na página de notícias');
+            renderNews(currentNews, 'news-list-page');
+        } else {
+            const errorMsg = data.message || 'Erro ao carregar notícias';
+            console.error('Erro na resposta da API:', errorMsg);
+            throw new Error(errorMsg);
+        }
+    } catch (error) {
+        console.error('Erro ao carregar notícias:', error);
+        
+        const errorHtml = `
+            <div class="col-span-2 text-center py-8">
+                <i class="fas fa-exclamation-triangle text-4xl text-red-500 mb-2"></i>
+                <p class="text-red-400">Erro ao carregar notícias. Tente novamente mais tarde.</p>
+                <button onclick="loadNews()" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">
+                    Tentar novamente
+                </button>
+            </div>
+        `;
+        
+        if (dashboardNews) dashboardNews.innerHTML = errorHtml;
+        if (newsListPage) newsListPage.innerHTML = errorHtml;
+    }
+}
 
-            // Condições
-            const condicoesDiv = document.getElementById('condicoes');
-            condicoesDiv.innerHTML = '';
-            result.possiveis_condicoes.forEach(condicao => {
-                const div = document.createElement('div');
-                div.className = 'flex items-center justify-between bg-gray-700 bg-opacity-50 p-3 rounded-lg';
-                
-                const urgencyColor = 
-                    condicao.urgencia.toLowerCase() === 'alta' ? 'bg-red-500' :
-                    condicao.urgencia.toLowerCase() === 'média' ? 'bg-yellow-500' : 
-                    'bg-green-500';
+// Carrega as notícias quando a aba de notícias é aberta
+const tabNews = document.getElementById('tab-news');
+const tabNewsM = document.getElementById('tab-news-m');
 
-                div.innerHTML = `
-                    <span class="flex items-center">
-                        <i class="fas fa-exclamation-circle mr-2"></i>
-                        ${condicao.condicao}
-                    </span>
-                    <span class="px-3 py-1 rounded-full ${urgencyColor}">
-                        ${condicao.urgencia}
-                    </span>
-                `;
-                condicoesDiv.appendChild(div);
+const handleNewsTabClick = () => {
+    // Mostra a seção de notícias
+    showSection('news');
+    // Carrega as notícias
+    loadNews();
+};
+
+if (tabNews) tabNews.addEventListener('click', handleNewsTabClick);
+if (tabNewsM) tabNewsM.addEventListener('click', handleNewsTabClick);
+
+// Carrega as notícias quando a página é carregada diretamente na aba de notícias
+document.addEventListener('DOMContentLoaded', () => {
+    // Verifica se já estamos na aba de notícias (carregamento direto)
+    if (window.location.hash === '#news') {
+        showSection('news');
+        loadNews();
+    }
+    
+    // Configura os seletores de categoria
+    const categorySelectors = [
+        document.getElementById('news-category'),
+        document.getElementById('news-category-page')
+    ];
+    
+    categorySelectors.forEach(selector => {
+        if (selector) {
+            selector.addEventListener('change', (e) => {
+                currentFilter = e.target.value;
+                applyCategoryFilter();
             });
         }
-    </script>
+    });
+});
+
+// Navegação de abas
+function showSection(section) {
+    document.getElementById('dashboard-section').classList.add('hidden');
+    document.getElementById('news-section').classList.add('hidden');
+    document.getElementById('info-section').classList.add('hidden');
+    document.getElementById(section+'-section').classList.remove('hidden');
+}
+['tab-dashboard','tab-news','tab-info'].forEach((id, idx) => {
+    const section = ['dashboard','news','info'][idx];
+    const btn = document.getElementById(id);
+    if(btn) btn.onclick = () => showSection(section);
+});
+['tab-dashboard-m','tab-news-m','tab-info-m'].forEach((id, idx) => {
+    const section = ['dashboard','news','info'][idx];
+    const btn = document.getElementById(id);
+    if(btn) btn.onclick = () => { showSection(section); mobileSidebar.classList.add('hidden'); };
+});
+
+let stream = null;
+const cameraPreview = document.getElementById('camera-preview');
+const imagePreview = document.getElementById('image-preview');
+const placeholder = document.getElementById('placeholder');
+const startCamera = document.getElementById('start-camera');
+const capturePhoto = document.getElementById('capture-photo');
+const fileInput = document.getElementById('file-input');
+let imageBlob = null;
+
+// Iniciar câmera
+startCamera.addEventListener('click', async () => {
+    try {
+        stream = await navigator.mediaDevices.getUserMedia({ 
+            video: { 
+                facingMode: 'environment',
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+            } 
+        });
+        cameraPreview.srcObject = stream;
+        cameraPreview.classList.remove('hidden');
+        imagePreview.classList.add('hidden');
+        placeholder.classList.add('hidden');
+        capturePhoto.classList.remove('hidden');
+        cameraPreview.play();
+    } catch (err) {
+        console.error('Erro ao acessar a câmera:', err);
+        alert('Não foi possível acessar a câmera. Por favor, verifique as permissões.');
+    }
+});
+
+// Capturar foto
+capturePhoto.addEventListener('click', () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = cameraPreview.videoWidth;
+    canvas.height = cameraPreview.videoHeight;
+    canvas.getContext('2d').drawImage(cameraPreview, 0, 0);
+    
+    canvas.toBlob(blob => {
+        imageBlob = blob;
+        imagePreview.src = URL.createObjectURL(blob);
+        imagePreview.classList.remove('hidden');
+        cameraPreview.classList.add('hidden');
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+        }
+        capturePhoto.classList.add('hidden');
+    }, 'image/jpeg', 0.8);
+});
+
+// Upload de arquivo
+fileInput.addEventListener('change', (e) => {
+    if (e.target.files && e.target.files[0]) {
+        imageBlob = e.target.files[0];
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            imagePreview.src = e.target.result;
+            imagePreview.classList.remove('hidden');
+            cameraPreview.classList.add('hidden');
+            placeholder.classList.add('hidden');
+            capturePhoto.classList.add('hidden');
+        };
+        reader.readAsDataURL(e.target.files[0]);
+    }
+});
+
+// Função para exibir mensagem de erro
+function showError(message) {
+    const errorDiv = document.getElementById('error-message');
+    if (!errorDiv) {
+        // Cria a div de erro se não existir
+        const resultsDiv = document.getElementById('results');
+        const newErrorDiv = document.createElement('div');
+        newErrorDiv.id = 'error-message';
+        newErrorDiv.className = 'bg-red-900 text-white p-4 rounded-lg mb-4';
+        newErrorDiv.innerHTML = `
+            <div class="flex items-center">
+                <i class="fas fa-exclamation-triangle mr-2"></i>
+                <span class="font-semibold">Erro:</span>
+                <span class="ml-1">${message}</span>
+            </div>
+        `;
+        resultsDiv.parentNode.insertBefore(newErrorDiv, resultsDiv.nextSibling);
+    } else {
+        // Atualiza a mensagem de erro existente
+        errorDiv.querySelector('span:last-child').textContent = message;
+        errorDiv.classList.remove('hidden');
+    }
+}
+
+// Analisar imagem
+document.getElementById('analyze-btn').addEventListener('click', async () => {
+    if (!imageBlob) {
+        showError('Por favor, capture uma foto ou faça upload de uma imagem.');
+        return;
+    }
+
+    const loading = document.getElementById('loading');
+    const results = document.getElementById('results');
+    const errorDiv = document.getElementById('error-message');
+    
+    // Esconde mensagens de erro anteriores e mostra o loading
+    if (errorDiv) errorDiv.classList.add('hidden');
+    loading.classList.remove('hidden');
+    results.classList.add('hidden');
+
+    const formData = new FormData();
+    formData.append('image', imageBlob);
+
+    try {
+        const response = await fetch('/analyze', {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (!response.ok) {
+            // Se a resposta não for OK, tenta extrair a mensagem de erro
+            const errorData = await response.json().catch(() => ({}));
+            const errorMessage = errorData.error || `Erro ${response.status}: ${response.statusText}`;
+            throw new Error(errorMessage);
+        }
+        
+        const result = await response.json();
+        
+        // Verifica se há erro na resposta
+        if (result.error) {
+            throw new Error(result.error);
+        }
+        
+        displayResults(result);
+    } catch (error) {
+        console.error('Erro na análise:', error);
+        showError(error.message || 'Ocorreu um erro durante a análise. Por favor, tente novamente.');
+    } finally {
+        loading.classList.add('hidden');
+    }
+});
+
+function displayResults(result) {
+    const results = document.getElementById('results');
+    results.classList.remove('hidden');
+
+    // Status
+    const statusElement = document.getElementById('statusPele');
+    if (result.saudavel) {
+        statusElement.textContent = 'Saudável';
+        statusElement.className = 'px-4 py-1 rounded-full bg-green-500 text-white';
+    } else {
+        statusElement.textContent = 'Requer Atenção';
+        statusElement.className = 'px-4 py-1 rounded-full bg-red-500 text-white';
+    }
+
+    // Características
+    document.getElementById('caracteristicas').textContent = 
+        result.caracteristicas.replace(/\\n/g, ' ');
+
+    // Condições
+    const condicoesDiv = document.getElementById('condicoes');
+    condicoesDiv.innerHTML = '';
+    result.possiveis_condicoes.forEach(condicao => {
+        const div = document.createElement('div');
+        div.className = 'flex items-center justify-between bg-gray-700 bg-opacity-50 p-3 rounded-lg';
+        
+        const urgencyColor = 
+            condicao.urgencia.toLowerCase() === 'alta' ? 'bg-red-500' :
+            condicao.urgencia.toLowerCase() === 'média' ? 'bg-yellow-500' : 
+            'bg-green-500';
+
+        div.innerHTML = `
+            <span class="flex items-center">
+                <i class="fas fa-exclamation-circle mr-2"></i>
+                ${condicao.condicao}
+            </span>
+            <span class="px-3 py-1 rounded-full ${urgencyColor}">
+                ${condicao.urgencia}
+            </span>
+        `;
+        condicoesDiv.appendChild(div);
+    });
+}
+</script>
 </body>
 </html>

@@ -5,7 +5,7 @@ from PIL import Image
 from google.ai.generativelanguage_v1beta.types import content
 
 # Configure a chave da API
-genai.configure(api_key="AIzaSyAgr6SVtn1tfrD_ynYO0eZKXaHQP8ONI28")
+genai.configure(api_key="AIzaSyCaln71FJ8nBA2LoINbJ0wm5wHAGP7hjjA")
 
 class GeminiModelWrapper:
     def __init__(self):
@@ -48,7 +48,7 @@ class GeminiModelWrapper:
         }
         # Inicializa o modelo Gemini
         self.model = genai.GenerativeModel(
-            model_name="gemini-1.5-pro",
+            model_name="gemini-2.0-flash",
             generation_config=self.generation_config,
         )
 
