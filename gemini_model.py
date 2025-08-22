@@ -3,9 +3,11 @@ from flask import Flask, request, jsonify
 import google.generativeai as genai
 from PIL import Image
 from google.ai.generativelanguage_v1beta.types import content
+from dotenv import load_dotenv
+load_dotenv()
 
 # Configure a chave da API
-genai.configure(api_key="AIzaSyCaln71FJ8nBA2LoINbJ0wm5wHAGP7hjjA")
+genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
 class GeminiModelWrapper:
     def __init__(self):
