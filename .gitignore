@@ -1,0 +1,5 @@
+app.db
+.env
+.env.example
+__pycache__
+uploads

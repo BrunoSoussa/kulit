@@ -13,10 +13,48 @@
         @keyframes sidebarIn { from { transform: translateX(-100%); opacity:0; } to { transform: translateX(0); opacity:1; } }
         .fade-in { animation: fadeIn 0.6s cubic-bezier(.4,0,.2,1); }
         @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+        /* Animated background image (subtle pan) */
+        .bg-hero {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background-image: url('https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?q=80&w=1920&auto=format&fit=crop'); /* close-up healthy skin/healthcare */
+            background-size: cover;
+            background-position: center;
+            opacity: 0.15;
+            filter: saturate(1.05) contrast(1.05);
+        }
+        .animate-pan {
+            animation: pan 45s linear infinite alternate;
+        }
+        @keyframes pan {
+            0% { background-position: 40% 50%; }
+            100% { background-position: 60% 40%; }
+        }
+        /* Dark mask to ensure contrast */
+        .bg-mask {
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+            background: radial-gradient(1200px 800px at 20% 10%, rgba(0,0,0,0.35), rgba(0,0,0,0.6)),
+                        linear-gradient(135deg, rgba(2,6,23,0.85), rgba(17,24,39,0.85));
+            pointer-events: none;
+        }
+        /* Responsive tweaks */
+        @media (max-width: 640px) {
+            .bg-hero { opacity: 0.12; }
+            .animate-pan { animation-duration: 60s; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .animate-pan { animation: none; }
+        }
     </style>
 </head>
 <body class="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-800 text-gray-100">
-<div class="flex min-h-screen">
+<a href="/auth/logout" title="Sair" class="fixed top-2 right-2 z-50 text-xs px-2 py-1 rounded border border-gray-600/30 text-gray-300/40 hover:text-gray-200/90 hover:border-gray-500/60 bg-gray-800/20 hover:bg-gray-800/40 transition-colors">Sair</a>
+<div class="bg-hero animate-pan"></div>
+<div class="bg-mask"></div>
+<div class="flex min-h-screen relative" style="z-index: 2;">
     <!-- Sidebar -->
     <aside class="sidebar-enter w-64 bg-gray-900 border-r border-gray-800 flex flex-col z-20 min-h-screen hidden md:flex">
         <div class="h-20 flex items-center justify-center border-b border-gray-800">
@@ -26,6 +64,7 @@
             <ul class="space-y-1">
                 <li><button id="tab-dashboard" class="w-full text-left px-6 py-3 hover:bg-gray-800 rounded transition-colors flex items-center text-gray-300 font-semibold"><i class="fas fa-home mr-2"></i> Dashboard</button></li>
                 <li><button id="tab-news" class="w-full text-left px-6 py-3 hover:bg-gray-800 rounded transition-colors flex items-center text-gray-300 font-semibold"><i class="fas fa-newspaper mr-2"></i> Notícias</button></li>
+                <li><button id="tab-diagnostics" class="w-full text-left px-6 py-3 hover:bg-gray-800 rounded transition-colors flex items-center text-gray-300 font-semibold"><i class="fas fa-notes-medical mr-2"></i> Diagnósticos</button></li>
                 <li><button id="tab-info" class="w-full text-left px-6 py-3 hover:bg-gray-800 rounded transition-colors flex items-center text-gray-300 font-semibold"><i class="fas fa-info-circle mr-2"></i> Sobre Câncer de Pele</button></li>
             </ul>
         </nav>
@@ -47,53 +86,73 @@
                     <li><button id="tab-dashboard-m" class="w-full text-left px-6 py-3 hover:bg-gray-800 rounded transition-colors flex items-center text-gray-300 font-semibold"><i class="fas fa-home mr-2"></i> Dashboard</button></li>
                     <li><button id="tab-news-m" class="w-full text-left px-6 py-3 hover:bg-gray-800 rounded transition-colors flex items-center text-gray-300 font-semibold"><i class="fas fa-newspaper mr-2"></i> Notícias</button></li>
                     <li><button id="tab-info-m" class="w-full text-left px-6 py-3 hover:bg-gray-800 rounded transition-colors flex items-center text-gray-300 font-semibold"><i class="fas fa-info-circle mr-2"></i> Sobre Câncer de Pele</button></li>
+                    <li><button id="tab-diagnostics-m" class="w-full text-left px-6 py-3 hover:bg-gray-800 rounded transition-colors flex items-center text-gray-300 font-semibold"><i class="fas fa-notes-medical mr-2"></i> Diagnósticos</button></li>
                 </ul>
             </nav>
         </aside>
     </div>
     <!-- Main Content -->
-    <main class="flex-1 flex flex-col items-center justify-center px-2 md:px-8 py-8 fade-in">
+    <main class="flex-1 flex flex-col items-center justify-center px-2 md:px-8 pt-20 md:pt-8 pb-8 fade-in">
         <!-- Dashboard -->
         <section id="dashboard-section" class="w-full max-w-5xl mx-auto">
             <h1 class="text-4xl md:text-5xl font-bold text-center mb-8 bg-gradient-to-r from-blue-400 to-pink-500 text-transparent bg-clip-text">Análise Dermatológica</h1>
-            <div class="grid md:grid-cols-2 gap-8">
-                <!-- Upload/Captura -->
-                <div class="space-y-6">
-                    <div class="bg-gray-900 rounded-xl overflow-hidden aspect-video flex items-center justify-center border border-gray-800 shadow-lg">
-                        <video id="camera-preview" class="hidden"></video>
-                        <img id="image-preview" class="hidden w-full h-full object-cover" alt="Preview">
-                        <div id="placeholder" class="w-full h-full flex items-center justify-center text-gray-400">
-                            <i class="fas fa-camera text-4xl"></i>
+            <div id="dashboard-wrapper" class="mx-auto max-w-3xl">
+                <div class="bg-gray-900 border border-gray-800 rounded-2xl shadow-2xl p-6 md:p-8">
+                    <div id="dashboard-grid" class="grid gap-8">
+                        <!-- Upload/Captura -->
+                        <div class="space-y-6">
+                            <div class="relative bg-gray-800 rounded-2xl overflow-hidden aspect-video flex items-center justify-center border border-gray-700 shadow-xl">
+                                <video id="camera-preview" class="hidden w-full h-full object-cover"></video>
+                                <img id="image-preview" class="hidden w-full h-full object-cover" alt="Preview">
+                                <div id="placeholder" class="absolute inset-0 flex flex-col items-center justify-center text-gray-400">
+                                    <div class="w-20 h-20 rounded-full bg-gray-900 border border-gray-700 flex items-center justify-center shadow-inner">
+                                        <i class="fas fa-camera text-2xl"></i>
+                                    </div>
+                                    <p class="mt-3 text-xs text-gray-400">Capture ou faça upload para começar</p>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <button id="start-camera" class="group bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg flex items-center justify-center font-semibold shadow-lg transition-all focus:outline-none">
+                                    <i class="fas fa-camera mr-2 transition-transform group-hover:scale-110"></i>Câmera
+                                </button>
+                                <label class="group bg-pink-600 hover:bg-pink-700 text-white py-3 px-6 rounded-lg flex items-center justify-center cursor-pointer font-semibold shadow-lg transition-all focus:outline-none">
+                                    <i class="fas fa-upload mr-2 transition-transform group-hover:scale-110"></i>Upload
+                                    <input type="file" accept="image/*" id="file-input" class="hidden">
+                                </label>
+                            </div>
+                            <button id="capture-photo" class="hidden w-full bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded-lg font-semibold shadow-lg transition-all focus:outline-none"><i class="fas fa-camera-retro mr-2"></i>Capturar Foto</button>
+                        </div>
+                        <!-- Resultados -->
+                        <div class="space-y-6">
+                            <button id="analyze-btn" class="hidden w-full bg-indigo-600 hover:bg-indigo-700 text-white py-4 px-6 rounded-lg font-semibold shadow-lg transition-all focus:outline-none">Analisar Imagem</button>
+                            <div id="loading" class="hidden flex items-center justify-center space-x-4">
+                                <div class="w-12 h-12 border-4 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
+                                <span class="text-blue-400">Analisando...</span>
+                            </div>
+                            <div id="results" class="hidden space-y-4 bg-gray-800 rounded-xl p-6 border border-gray-700 shadow">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-gray-300">Status:</span>
+                                    <span id="statusPele" class="px-4 py-1 rounded-full"></span>
+                                </div>
+                                <div>
+                                    <h3 class="text-gray-300 mb-2 font-semibold">Características:</h3>
+                                    <p id="caracteristicas" class="text-sm bg-gray-700 rounded-lg p-3"></p>
+                                </div>
+                                <div>
+                                    <h3 class="text-gray-300 mb-2 font-semibold">Condições:</h3>
+                                    <div id="condicoes" class="space-y-2"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <button id="start-camera" class="bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg flex items-center justify-center font-semibold shadow transition-transform transform hover:scale-105 focus:outline-none"><i class="fas fa-camera mr-2"></i>Câmera</button>
-                        <label class="bg-pink-600 hover:bg-pink-700 text-white py-3 px-6 rounded-lg flex items-center justify-center cursor-pointer font-semibold shadow transition-transform transform hover:scale-105 focus:outline-none"><i class="fas fa-upload mr-2"></i>Upload<input type="file" accept="image/*" id="file-input" class="hidden"></label>
-                    </div>
-                    <button id="capture-photo" class="hidden w-full bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded-lg font-semibold shadow transition-transform transform hover:scale-105 focus:outline-none"><i class="fas fa-camera-retro mr-2"></i>Capturar Foto</button>
                 </div>
-                <!-- Resultados -->
-                <div class="space-y-6">
-                    <button id="analyze-btn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-4 px-6 rounded-lg font-semibold shadow transition-transform transform hover:scale-105 focus:outline-none">Analisar Imagem</button>
-                    <div id="loading" class="hidden flex items-center justify-center space-x-4">
-                        <div class="w-12 h-12 border-4 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
-                        <span class="text-blue-400">Analisando...</span>
-                    </div>
-                    <div id="results" class="hidden space-y-4 bg-gray-800 bg-opacity-70 rounded-lg p-6 border border-gray-700">
-                        <div class="flex items-center justify-between">
-                            <span class="text-gray-300">Status:</span>
-                            <span id="statusPele" class="px-4 py-1 rounded-full"></span>
-                        </div>
-                        <div>
-                            <h3 class="text-gray-300 mb-2 font-semibold">Características:</h3>
-                            <p id="caracteristicas" class="text-sm bg-gray-700 bg-opacity-50 rounded-lg p-3"></p>
-                        </div>
-                        <div>
-                            <h3 class="text-gray-300 mb-2 font-semibold">Condições:</h3>
-                            <div id="condicoes" class="space-y-2"></div>
-                        </div>
-                    </div>
-                </div>
+            </div>
+        </section>
+        <!-- Diagnósticos -->
+        <section id="diagnostics-section" class="w-full max-w-5xl mx-auto hidden">
+            <h2 class="text-3xl font-bold mb-6 text-green-400 flex items-center"><i class="fas fa-notes-medical mr-2"></i> Seus diagnósticos</h2>
+            <div id="diagnostics-list" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- preenchido via JS -->
             </div>
         </section>
         <!-- Notícias (Página) -->
@@ -388,18 +447,112 @@ function showSection(section) {
     document.getElementById('dashboard-section').classList.add('hidden');
     document.getElementById('news-section').classList.add('hidden');
     document.getElementById('info-section').classList.add('hidden');
+    document.getElementById('diagnostics-section').classList.add('hidden');
     document.getElementById(section+'-section').classList.remove('hidden');
 }
-['tab-dashboard','tab-news','tab-info'].forEach((id, idx) => {
-    const section = ['dashboard','news','info'][idx];
+['tab-dashboard','tab-news','tab-info','tab-diagnostics'].forEach((id, idx) => {
+    const section = ['dashboard','news','info','diagnostics'][idx];
     const btn = document.getElementById(id);
     if(btn) btn.onclick = () => showSection(section);
 });
-['tab-dashboard-m','tab-news-m','tab-info-m'].forEach((id, idx) => {
-    const section = ['dashboard','news','info'][idx];
+['tab-dashboard-m','tab-news-m','tab-info-m','tab-diagnostics-m'].forEach((id, idx) => {
+    const section = ['dashboard','news','info','diagnostics'][idx];
     const btn = document.getElementById(id);
     if(btn) btn.onclick = () => { showSection(section); mobileSidebar.classList.add('hidden'); };
 });
+
+// Diagnósticos
+async function loadDiagnostics() {
+    const container = document.getElementById('diagnostics-list');
+    if (!container) return;
+    container.innerHTML = `
+        <div class="col-span-2 flex flex-col items-center justify-center py-8">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mb-4"></div>
+            <p class="text-gray-400">Carregando diagnósticos...</p>
+        </div>`;
+
+    try {
+        const res = await fetch('/api/diagnostics');
+        if (!res.ok) throw new Error('Falha ao carregar diagnósticos');
+        const data = await res.json();
+        const items = (data && data.items) ? data.items : [];
+        if (!items.length) {
+            container.innerHTML = `
+                <div class="col-span-2 text-center py-8">
+                    <i class="fas fa-notes-medical text-4xl text-gray-500 mb-2"></i>
+                    <p class="text-gray-400">Você ainda não possui diagnósticos.</p>
+                </div>`;
+            return;
+        }
+
+        container.innerHTML = '';
+        items.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'bg-gray-800 rounded-lg overflow-hidden border border-gray-700 hover:border-green-500 transition-colors duration-200';
+            const createdAt = item.created_at ? new Date(item.created_at).toLocaleString('pt-BR') : '';
+            const condicoes = (item.data && Array.isArray(item.data.possiveis_condicoes)) ? item.data.possiveis_condicoes : [];
+            // Calcula resumo preferindo os dados estruturados
+            let resumo = '';
+            if (condicoes && condicoes.length) {
+                resumo = condicoes.map(c => {
+                    if (typeof c === 'string') return c;
+                    if (c && typeof c === 'object') {
+                        const nome = (c.condicao || c['condição'] || '').toString();
+                        const urg = (c.urgencia || c['urgência'] || '').toString();
+                        return nome ? `${nome}${urg ? ` (${urg})` : ''}` : '';
+                    }
+                    return '';
+                }).filter(Boolean).join(', ');
+            }
+            if (!resumo && item.diagnosis) resumo = item.diagnosis;
+            card.innerHTML = `
+                <div class="grid grid-cols-3 gap-0">
+                    <div class="col-span-1">
+                        <img src="${item.image_url}" alt="Diagnóstico" class="w-full h-40 object-cover">
+                    </div>
+                    <div class="col-span-2 p-4">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-lg font-semibold text-white">Diagnóstico</h3>
+                            <span class="text-xs text-gray-400">${createdAt}</span>
+                        </div>
+                        <p class="text-gray-300 mt-2 line-clamp-2">${resumo || 'Sem resumo'}</p>
+                        <div class="mt-3 space-y-1 max-h-24 overflow-auto pr-1">
+                            ${condicoes.map(c => {
+                                if (typeof c === 'string') {
+                                    return `
+                                        <div class="flex items-center justify-between bg-gray-700 bg-opacity-50 p-2 rounded">
+                                            <span>${c}</span>
+                                        </div>`;
+                                }
+                                const nome = (c.condicao || c['condição'] || '').toString();
+                                const urgRaw = (c.urgencia || c['urgência'] || '').toString();
+                                const urg = urgRaw.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
+                                const color = urg === 'alta' ? 'bg-red-500' : (urg === 'media' ? 'bg-yellow-500' : 'bg-green-500');
+                                return `
+                                    <div class="flex items-center justify-between bg-gray-700 bg-opacity-50 p-2 rounded">
+                                        <span>${nome}</span>
+                                        <span class="px-2 py-0.5 rounded-full ${color}">${urgRaw}</span>
+                                    </div>`;
+                            }).join('')}
+                        </div>
+                    </div>
+                </div>`;
+            container.appendChild(card);
+        });
+    } catch (e) {
+        container.innerHTML = `
+            <div class="col-span-2 text-center py-8">
+                <i class="fas fa-exclamation-triangle text-4xl text-red-500 mb-2"></i>
+                <p class="text-red-400">Não foi possível carregar seus diagnósticos.</p>
+            </div>`;
+    }
+}
+
+// Carregar diagnósticos ao abrir aba
+const tabDiag = document.getElementById('tab-diagnostics');
+const tabDiagM = document.getElementById('tab-diagnostics-m');
+if (tabDiag) tabDiag.addEventListener('click', () => { showSection('diagnostics'); loadDiagnostics(); });
+if (tabDiagM) tabDiagM.addEventListener('click', () => { showSection('diagnostics'); loadDiagnostics(); mobileSidebar.classList.add('hidden'); });
 
 let stream = null;
 const cameraPreview = document.getElementById('camera-preview');
@@ -409,6 +562,23 @@ const startCamera = document.getElementById('start-camera');
 const capturePhoto = document.getElementById('capture-photo');
 const fileInput = document.getElementById('file-input');
 let imageBlob = null;
+const analyzeBtn = document.getElementById('analyze-btn');
+const dashboardGrid = document.getElementById('dashboard-grid');
+const dashboardWrapper = document.getElementById('dashboard-wrapper');
+
+function updateDashboardLayout() {
+    const results = document.getElementById('results');
+    const hasRightContent = (analyzeBtn && !analyzeBtn.classList.contains('hidden')) || (results && !results.classList.contains('hidden'));
+    if (hasRightContent) {
+        dashboardGrid && dashboardGrid.classList.add('md:grid-cols-2');
+        dashboardWrapper && dashboardWrapper.classList.add('max-w-5xl');
+        dashboardWrapper && dashboardWrapper.classList.remove('max-w-3xl');
+    } else {
+        dashboardGrid && dashboardGrid.classList.remove('md:grid-cols-2');
+        dashboardWrapper && dashboardWrapper.classList.remove('max-w-5xl');
+        dashboardWrapper && dashboardWrapper.classList.add('max-w-3xl');
+    }
+}
 
 // Iniciar câmera
 startCamera.addEventListener('click', async () => {
@@ -425,7 +595,9 @@ startCamera.addEventListener('click', async () => {
         imagePreview.classList.add('hidden');
         placeholder.classList.add('hidden');
         capturePhoto.classList.remove('hidden');
+        if (analyzeBtn) analyzeBtn.classList.add('hidden');
         cameraPreview.play();
+        updateDashboardLayout();
     } catch (err) {
         console.error('Erro ao acessar a câmera:', err);
         alert('Não foi possível acessar a câmera. Por favor, verifique as permissões.');
@@ -448,6 +620,8 @@ capturePhoto.addEventListener('click', () => {
             stream.getTracks().forEach(track => track.stop());
         }
         capturePhoto.classList.add('hidden');
+        if (analyzeBtn) analyzeBtn.classList.remove('hidden');
+        updateDashboardLayout();
     }, 'image/jpeg', 0.8);
 });
 
@@ -462,6 +636,8 @@ fileInput.addEventListener('change', (e) => {
             cameraPreview.classList.add('hidden');
             placeholder.classList.add('hidden');
             capturePhoto.classList.add('hidden');
+            if (analyzeBtn) analyzeBtn.classList.remove('hidden');
+            updateDashboardLayout();
         };
         reader.readAsDataURL(e.target.files[0]);
     }
@@ -506,6 +682,7 @@ document.getElementById('analyze-btn').addEventListener('click', async () => {
     if (errorDiv) errorDiv.classList.add('hidden');
     loading.classList.remove('hidden');
     results.classList.add('hidden');
+    updateDashboardLayout();
 
     const formData = new FormData();
     formData.append('image', imageBlob);
@@ -531,6 +708,7 @@ document.getElementById('analyze-btn').addEventListener('click', async () => {
         }
         
         displayResults(result);
+        updateDashboardLayout();
     } catch (error) {
         console.error('Erro na análise:', error);
         showError(error.message || 'Ocorreu um erro durante a análise. Por favor, tente novamente.');
