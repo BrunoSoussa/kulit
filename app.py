@@ -10,7 +10,7 @@ from db import init_db, save_analysis, list_analyses_by_user
 
 gemini = GeminiModelWrapper()
 app = Flask(__name__)
-s
+
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key')
 app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(__file__), 'uploads')
 
